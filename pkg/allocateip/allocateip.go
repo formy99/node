@@ -246,7 +246,7 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 	var addr string
 	switch attrType {
 	case ipam.AttributeTypeVXLAN:
-		addr = node.Spec.IPv4VXLANTunnelAddr
+		addr = node.Spec.IPv6VXLANTunnelAddr
 	case ipam.AttributeTypeIPIP:
 		if node.Spec.BGP != nil {
 			addr = node.Spec.BGP.IPv4IPIPTunnelAddr
@@ -407,25 +407,25 @@ func assignHostTunnelAddr(ctx context.Context, c client.Interface, nodename stri
 	logCtx := getLogger(attrType)
 
 	args := ipam.AutoAssignArgs{
-		Num4:      1,
-		Num6:      0,
+		Num4:      0,
+		Num6:      1,
 		HandleID:  &handle,
 		Attrs:     attrs,
 		Hostname:  nodename,
-		IPv4Pools: cidrs,
+		IPv6Pools: cidrs,
 	}
 
-	ipv4Addrs, _, err := c.IPAM().AutoAssign(ctx, args)
+	ipv6Addrs, _, err := c.IPAM().AutoAssign(ctx, args)
 	if err != nil {
 		logCtx.WithError(err).Fatal("Unable to autoassign an address")
 	}
 
-	if len(ipv4Addrs) == 0 {
+	if len(ipv6Addrs) == 0 {
 		logCtx.Fatal("Unable to autoassign an address - pools are likely exhausted.")
 	}
 
 	// Update the node object with the assigned address.
-	ip := ipv4Addrs[0].IP.String()
+	ip := ipv6Addrs[0].IP.String()
 	if err = updateNodeWithAddress(ctx, c, nodename, ip, attrType); err != nil {
 		// We hit an error, so release the IP address before exiting.
 		err := c.IPAM().ReleaseByHandle(ctx, handle)
@@ -450,7 +450,7 @@ func updateNodeWithAddress(ctx context.Context, c client.Interface, nodename str
 
 		switch attrType {
 		case ipam.AttributeTypeVXLAN:
-			node.Spec.IPv4VXLANTunnelAddr = addr
+			node.Spec.IPv6VXLANTunnelAddr = addr
 		case ipam.AttributeTypeIPIP:
 			if node.Spec.BGP == nil {
 				node.Spec.BGP = &api.NodeBGPSpec{}
@@ -495,8 +495,8 @@ func removeHostTunnelAddr(ctx context.Context, c client.Interface, nodename stri
 		var ipAddr *net.IP
 		switch attrType {
 		case ipam.AttributeTypeVXLAN:
-			ipAddrStr = node.Spec.IPv4VXLANTunnelAddr
-			node.Spec.IPv4VXLANTunnelAddr = ""
+			ipAddrStr = node.Spec.IPv6VXLANTunnelAddr
+			node.Spec.IPv6VXLANTunnelAddr = ""
 		case ipam.AttributeTypeIPIP:
 			if node.Spec.BGP != nil {
 				ipAddrStr = node.Spec.BGP.IPv4IPIPTunnelAddr
