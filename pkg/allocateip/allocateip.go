@@ -607,7 +607,7 @@ func determineEnabledPoolCIDRs(node api.Node, ipPoolList api.IPPoolList, attrTyp
 		// don't support encap with IPv6.
 		switch attrType {
 		case ipam.AttributeTypeVXLAN:
-			if (ipPool.Spec.VXLANMode == api.VXLANModeAlways || ipPool.Spec.VXLANMode == api.VXLANModeCrossSubnet) && !ipPool.Spec.Disabled && poolCidr.Version() == 4 {
+			if (ipPool.Spec.VXLANMode == api.VXLANModeAlways || ipPool.Spec.VXLANMode == api.VXLANModeCrossSubnet) && !ipPool.Spec.Disabled && poolCidr.Version() == 6 {
 				cidrs = append(cidrs, *poolCidr)
 			}
 		case ipam.AttributeTypeIPIP:
