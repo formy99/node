@@ -415,7 +415,7 @@ func assignHostTunnelAddr(ctx context.Context, c client.Interface, nodename stri
 		IPv6Pools: cidrs,
 	}
 
-	ipv6Addrs, _, err := c.IPAM().AutoAssign(ctx, args)
+	_, ipv6Addrs, err := c.IPAM().AutoAssign(ctx, args)
 	if err != nil {
 		logCtx.WithError(err).Fatal("Unable to autoassign an address")
 	}
