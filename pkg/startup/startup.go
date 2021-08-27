@@ -49,7 +49,6 @@ import (
 
 	"github.com/projectcalico/node/pkg/calicoclient"
 	"github.com/projectcalico/node/pkg/startup/autodetection"
-	"github.com/projectcalico/node/pkg/startup/autodetection/ipv4"
 )
 
 const (
@@ -904,7 +903,7 @@ func configureIPPools(ctx context.Context, client client.Interface, kubeadmConfi
 		}
 	}
 
-	ipv4IpipModeEnvVar := strings.ToLower(os.Getenv("CALICO_IPV4POOL_IPIP"))
+	//ipv4IpipModeEnvVar := strings.ToLower(os.Getenv("CALICO_IPV4POOL_IPIP"))
 	ipv6VXLANModeEnvVar := strings.ToLower(os.Getenv("CALICO_IPV6POOL_VXLAN"))
 
 	var (
@@ -956,22 +955,22 @@ func configureIPPools(ctx context.Context, client client.Interface, kubeadmConfi
 	}
 
 	// Read IPV4 CIDR from env if set and parse then check it for errors
-	if ipv4Pool == "" {
-		ipv4Pool = DEFAULT_IPV4_POOL_CIDR
-
-		_, preferedNet, _ := net.ParseCIDR(DEFAULT_IPV4_POOL_CIDR)
-		if selectedPool, err := ipv4.GetDefaultIPv4Pool(preferedNet); err == nil {
-			ipv4Pool = selectedPool.String()
-		}
-
-		log.Infof("Selected default IP pool is '%s'", ipv4Pool)
-	}
-	_, ipv4Cidr, err := cnet.ParseCIDR(ipv4Pool)
-	if err != nil || ipv4Cidr.Version() != 4 {
-		log.Errorf("Invalid CIDR specified in CALICO_IPV4POOL_CIDR '%s'", ipv4Pool)
-		terminate()
-		return // not really needed but allows testing to function
-	}
+	//if ipv4Pool == "" {
+	//	ipv4Pool = DEFAULT_IPV4_POOL_CIDR
+	//
+	//	_, preferedNet, _ := net.ParseCIDR(DEFAULT_IPV4_POOL_CIDR)
+	//	if selectedPool, err := ipv4.GetDefaultIPv4Pool(preferedNet); err == nil {
+	//		ipv4Pool = selectedPool.String()
+	//	}
+	//
+	//	log.Infof("Selected default IP pool is '%s'", ipv4Pool)
+	//}
+	//_, ipv4Cidr, err := cnet.ParseCIDR(ipv4Pool)
+	//if err != nil || ipv4Cidr.Version() != 4 {
+	//	log.Errorf("Invalid CIDR specified in CALICO_IPV4POOL_CIDR '%s'", ipv4Pool)
+	//	terminate()
+	//	return // not really needed but allows testing to function
+	//}
 
 	// If no IPv6 pool is specified, generate one.
 	if ipv6Pool == "" {
@@ -989,12 +988,12 @@ func configureIPPools(ctx context.Context, client client.Interface, kubeadmConfi
 	}
 
 	// Ensure there are pools created for each IP version.
-	if !ipv4Present {
-		log.Debug("Create default IPv4 IP pool")
-		outgoingNATEnabled := evaluateENVBool("CALICO_IPV4POOL_NAT_OUTGOING", true)
-
-		createIPPool(ctx, client, ipv4Cidr, DEFAULT_IPV4_POOL_NAME, ipv4IpipModeEnvVar, ipv6VXLANModeEnvVar, outgoingNATEnabled, ipv4BlockSize, ipv4NodeSelector)
-	}
+	//if !ipv4Present {
+	//	log.Debug("Create default IPv4 IP pool")
+	//	outgoingNATEnabled := evaluateENVBool("CALICO_IPV4POOL_NAT_OUTGOING", true)
+	//
+	//	createIPPool(ctx, client, ipv4Cidr, DEFAULT_IPV4_POOL_NAME, ipv4IpipModeEnvVar, ipv6VXLANModeEnvVar, outgoingNATEnabled, ipv4BlockSize, ipv4NodeSelector)
+	//}
 	if !ipv6Present && ipv6Supported() {
 		log.Debug("Create default IPv6 IP pool")
 		outgoingNATEnabled := evaluateENVBool("CALICO_IPV6POOL_NAT_OUTGOING", false)
