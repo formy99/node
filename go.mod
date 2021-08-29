@@ -23,8 +23,8 @@ require (
 replace (
 	github.com/Microsoft/hcsshim => github.com/projectcalico/hcsshim v0.8.9-calico
 	github.com/kelseyhightower/confd => github.com/projectcalico/confd v1.0.1-0.20210512200043-b48ac64483ee
-	github.com/projectcalico/felix v0.0.0-20210518114716-31a1f2adfdec => github.com/formy99/felix  v0.0.0-20210829145830-ba33da662a02
-	github.com/projectcalico/libcalico-go v1.7.2-0.20210513174936-6ccf0906db1d => github.com/formy99/libcalico-go  v1.7.2-0.20210827075704-d257bb47ed4e
+	github.com/projectcalico/felix v0.0.0-20210518114716-31a1f2adfdec => github.com/formy99/felix  v0.0.0-20210829180602-fccdaf312e18
+	github.com/projectcalico/libcalico-go v1.7.2-0.20210513174936-6ccf0906db1d => github.com/formy99/libcalico-go  v1.7.2-0.20210829180302-68201d0ef263
 	github.com/sirupsen/logrus => github.com/projectcalico/logrus v1.0.4-calico
 
 	// Need replacements for all the k8s subsidiary projects that are pulled in indirectly because
