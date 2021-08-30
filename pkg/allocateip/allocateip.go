@@ -407,21 +407,26 @@ func assignHostTunnelAddr(ctx context.Context, c client.Interface, nodename stri
 	logCtx := getLogger(attrType)
 
 	args := ipam.AutoAssignArgs{
-		Num4:      0,
+		Num4:      1,
 		Num6:      1,
 		HandleID:  &handle,
 		Attrs:     attrs,
 		Hostname:  nodename,
+		IPv4Pools: cidrs,
 		IPv6Pools: cidrs,
 	}
 
-	_, ipv6Addrs, err := c.IPAM().AutoAssign(ctx, args)
+	ipv4Addrs, ipv6Addrs, err := c.IPAM().AutoAssign(ctx, args)
 	if err != nil {
 		logCtx.WithError(err).Fatal("Unable to autoassign an address")
 	}
 
+	if len(ipv4Addrs) == 0 {
+		logCtx.Fatal("Unable to autoassign an ipv4 address - pools are likely exhausted.")
+	}
+
 	if len(ipv6Addrs) == 0 {
-		logCtx.Fatal("Unable to autoassign an address - pools are likely exhausted.")
+		logCtx.Fatal("Unable to autoassign an ipv6 address - pools are likely exhausted.")
 	}
 
 	// Update the node object with the assigned address.
