@@ -113,6 +113,8 @@ github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMn
 github.com/cilium/ebpf v0.2.0/go.mod h1:To2CFviqOWL/M0gIMsvSMlqe7em/l1ALkX1PyjrX2Qs=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/clusterhq/flocker-go v0.0.0-20160920122132-2b8b7259d313/go.mod h1:P1wt9Z3DP8O6W3rvwCt0REIlshg1InHImaLW0t3ObY0=
+github.com/cockroachdb/cockroach v20.1.15+incompatible h1:OoxA4V1GSFxrExvfZ/zuPlC38oMfxptJmsU8iSF/eJo=
+github.com/cockroachdb/cockroach v20.1.15+incompatible/go.mod h1:xeT/CQ0qZHangbYbWShlCGAx31aV4AjGswDUjhKS6HQ=
 github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa h1:OaNxuTZr7kxeODyLWsRMC+OD03aFUH+mW6r2d+MWa5Y=
 github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:zn76sxSg3SzpJ0PPJaLDCu+Bu0Lg3sKTORVIj19EIF8=
 github.com/container-storage-interface/spec v1.3.0/go.mod h1:6URME8mwIBbpVyZV93Ce5St17xBiQJQY67NDsuohiy4=
@@ -203,10 +205,10 @@ github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568/go.mod h1:xEzjJPgXI
 github.com/fogleman/gg v1.2.1-0.20190220221249-0403632d5b90/go.mod h1:R/bRT+9gY/C5z7JzPU0zXsXHKM4/ayA+zqcVNZzPa1k=
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible h1:TcekIExNqud5crz4xD2pavyTgWiPvpYe4Xau31I0PRk=
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible/go.mod h1:pbq4aXjuKjdthFRnoDwaVPLA+WlJuPGy+QneDUgJi2k=
-github.com/formy99/felix v0.0.0-20210729075733-6b5e2762561e h1:0huKoNjzn0R2opCOaJ06MvA0sGxQmnoUxKchGrqHxYo=
-github.com/formy99/felix v0.0.0-20210729075733-6b5e2762561e/go.mod h1:6yqwMUe1vMqnDwZtyFU8PObN25qm+9Y2PyeuxElyBjE=
-github.com/formy99/libcalico-go v1.7.2-0.20210729033717-67aa0ebe77dc h1:9z6wOv+JzJdUNec1bZl48G7taFEv6zT6R3gz4DzFvlE=
-github.com/formy99/libcalico-go v1.7.2-0.20210729033717-67aa0ebe77dc/go.mod h1:CA54aw5b1PXwBWsl4k98ovXcLg8lw2X7OxiEqjjexFM=
+github.com/formy99/felix v0.0.0-20210829185657-a5627c7c2040 h1:PqgwXc48sexFhm3a1xnEnBPrsZrZUYLzLqxv4sGuKrs=
+github.com/formy99/felix v0.0.0-20210829185657-a5627c7c2040/go.mod h1:koHeXYA7C8I75gKzF59Oid8XbVDjyk36BRMVoaJqH+8=
+github.com/formy99/libcalico-go v1.7.2-0.20210831065512-111eba9951f5 h1:MavXz2tNIW5OjspEwkVqCaULUW/st+3+Sw5+f8fHcAQ=
+github.com/formy99/libcalico-go v1.7.2-0.20210831065512-111eba9951f5/go.mod h1:CA54aw5b1PXwBWsl4k98ovXcLg8lw2X7OxiEqjjexFM=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
@@ -620,8 +622,6 @@ github.com/projectcalico/go-yaml-wrapper v0.0.0-20191112210931-090425220c54/go.m
 github.com/projectcalico/hcsshim v0.8.9-calico h1:aRrOWouDTzKwaIoRGMV/I1QikR+ikwj1G9T9h3wD090=
 github.com/projectcalico/hcsshim v0.8.9-calico/go.mod h1:5692vkUqntj1idxauYlpoINNKeqCiG6Sg38RRsjT5y8=
 github.com/projectcalico/libcalico-go v1.7.2-0.20210512193219-9bbd69b5de2b/go.mod h1:CA54aw5b1PXwBWsl4k98ovXcLg8lw2X7OxiEqjjexFM=
-github.com/projectcalico/libcalico-go v1.7.2-0.20210513174936-6ccf0906db1d h1:DLMW6eSAQ+Zs+AP8KnKL4Tb4w/dYP1VTKvhE3cQVtF8=
-github.com/projectcalico/libcalico-go v1.7.2-0.20210513174936-6ccf0906db1d/go.mod h1:CA54aw5b1PXwBWsl4k98ovXcLg8lw2X7OxiEqjjexFM=
 github.com/projectcalico/logrus v1.0.4-calico h1:bHJ2KLGTFzoWpRISe13CO7HVxxrKunDjyUz/wFiBY8c=
 github.com/projectcalico/logrus v1.0.4-calico/go.mod h1:DfgrchabbtEO9wjOz5lVae+XRvjFKKWEA9GTMme6A8g=
 github.com/projectcalico/pod2daemon v0.0.0-20210416195010-6f2d574230b3 h1:FI93O4ZOPDZTySj971ayBc0ygGF/7/lEX4qciQcNjcs=
