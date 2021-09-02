@@ -243,116 +243,120 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 	}
 
 	// Get the address and ipam attribute string
-	var addr string
+	var addrs []string
 	switch attrType {
 	case ipam.AttributeTypeVXLAN:
-		addr = node.Spec.IPv6VXLANTunnelAddr
+		addrs = append(addrs, node.Spec.IPv4VXLANTunnelAddr)
+		addrs = append(addrs, node.Spec.IPv6VXLANTunnelAddr)
 	case ipam.AttributeTypeIPIP:
 		if node.Spec.BGP != nil {
-			addr = node.Spec.BGP.IPv4IPIPTunnelAddr
+			addrs = append(addrs, node.Spec.BGP.IPv4IPIPTunnelAddr)
 		}
 	case ipam.AttributeTypeWireguard:
 		if node.Spec.Wireguard != nil {
-			addr = node.Spec.Wireguard.InterfaceIPv4Address
+			addrs = append(addrs, node.Spec.Wireguard.InterfaceIPv4Address)
 		}
 	}
+	for _, addr := range addrs {
+		release := false
+		assign := true
 
-	// Work out if we need to assign a tunnel address.
-	// In most cases we should not release current address and should assign new one.
-	release := false
-	assign := true
-	if addr == "" {
-		// The tunnel has no IP address assigned, assign one.
-		logCtx.Info("Assign a new tunnel address")
-
-		// Defensively release any IP addresses with this handle. This covers a theoretical case
-		// where the node object has lost its reference to its IP, but the allocation still exists
-		// in IPAM. For example, if the node object was manually edited.
-		release = true
-	} else {
-		// Go ahead checking status of current address.
-		ipAddr := gnet.ParseIP(addr)
-		if ipAddr == nil {
-			logCtx.WithError(err).Fatalf("Failed to parse the CIDR '%s'", addr)
-		}
-
-		// Check if we got correct assignment attributes.
-		attr, handle, err := c.IPAM().GetAssignmentAttributes(ctx, net.IP{IP: ipAddr})
-		if err == nil {
-			if attr[ipam.AttributeType] == attrType && attr[ipam.AttributeNode] == nodename {
-				// The tunnel address is still assigned to this node, but is it in the correct pool this time?
-				if !isIpInPool(addr, cidrs) {
-					// Wrong pool, release this address.
-					logCtx.WithField("currentAddr", addr).Info("Current address is not in a valid pool, release it and reassign")
-					release = true
-				} else {
-					// Correct pool, keep this address.
-					logCtx.WithField("currentAddr", addr).Info("Current address is still valid, do nothing")
-					assign = false
-				}
-			} else if len(attr) == 0 {
-				// No attributes means that this is an old address, assigned by code that didn't use
-				// allocation attributes. It might be a pod address, or it might be a node tunnel
-				// address. The only way to tell is by the existence of a handle, since workload
-				// addresses have always used a handle, whereas tunnel addresses didn't start
-				// using handles until the same time as they got allocation attributes.
-				if handle != nil {
-					// Handle exists, so this address belongs to a workload. We need to assign
-					// a new one for the node, but we shouldn't clean up the old address.
-					logCtx.WithField("currentAddr", addr).Info("Current address is occupied, assign a new one")
-				} else {
-					// Handle does not exist. This is just an old tunnel address that comes from
-					// a time before we used handles and allocation attributes. Attempt to
-					// reassign the same address, but now with metadata. It's possible that someone
-					// else takes the address while we do this, in which case we'll just
-					// need to assign a new address.
-					if err := correctAllocationWithHandle(ctx, c, addr, nodename, attrType); err != nil {
-						if _, ok := err.(cerrors.ErrorResourceAlreadyExists); !ok {
-							// Unknown error attempting to allocate the address. Exit.
-							logCtx.WithError(err).Fatal("Error correcting tunnel IP allocation")
-						}
-
-						// The address was taken by someone else. We need to assign a new one.
-						logCtx.WithError(err).Warn("Failed to correct missing attributes, will assign a new address")
-					} else {
-						// We corrected the address, we can just return.
-						logCtx.Info("Updated tunnel address with allocation attributes")
-						return
-					}
-				}
-			} else {
-				// The allocation has attributes, but doesn't belong to us. Assign a new one.
-				logCtx.WithField("currentAddr", addr).Info("Current address is occupied, assign a new one")
-			}
-		} else if _, ok := err.(cerrors.ErrorResourceDoesNotExist); ok {
-			// The tunnel address is not assigned, reassign it.
-			logCtx.WithField("currentAddr", addr).Info("Current address is not assigned, assign a new one")
+		if addr == "" {
+			// The tunnel has no IP address assigned, assign one.
+			logCtx.Info("Assign a new tunnel address")
 
 			// Defensively release any IP addresses with this handle. This covers a theoretical case
-			// where the node object has lost its reference to its correct IP, but the allocation still exists
+			// where the node object has lost its reference to its IP, but the allocation still exists
 			// in IPAM. For example, if the node object was manually edited.
 			release = true
 		} else {
-			// Failed to get assignment attributes, datastore connection issues possible, panic
-			logCtx.WithError(err).Panicf("Failed to get assignment attributes for CIDR '%s'", addr)
-		}
-	}
-
-	if release {
-		logCtx.WithField("IP", addr).Info("Release any old tunnel addresses")
-		handle, _ := generateHandleAndAttributes(nodename, attrType)
-		if err := c.IPAM().ReleaseByHandle(ctx, handle); err != nil {
-			if _, ok := err.(cerrors.ErrorResourceDoesNotExist); !ok {
-				logCtx.WithError(err).Fatal("Failed to release old addresses")
+			// Go ahead checking status of current address.
+			ipAddr := gnet.ParseIP(addr)
+			if ipAddr == nil {
+				logCtx.WithError(err).Fatalf("Failed to parse the CIDR '%s'", addr)
 			}
-			// No existing allocations for this node.
+
+			// Check if we got correct assignment attributes.
+			attr, handle, err := c.IPAM().GetAssignmentAttributes(ctx, net.IP{IP: ipAddr})
+			if err == nil {
+				if attr[ipam.AttributeType] == attrType && attr[ipam.AttributeNode] == nodename {
+					// The tunnel address is still assigned to this node, but is it in the correct pool this time?
+					if !isIpInPool(addr, cidrs) {
+						// Wrong pool, release this address.
+						logCtx.WithField("currentAddr", addr).Info("Current address is not in a valid pool, release it and reassign")
+						release = true
+					} else {
+						// Correct pool, keep this address.
+						logCtx.WithField("currentAddr", addr).Info("Current address is still valid, do nothing")
+						assign = false
+					}
+				} else if len(attr) == 0 {
+					// No attributes means that this is an old address, assigned by code that didn't use
+					// allocation attributes. It might be a pod address, or it might be a node tunnel
+					// address. The only way to tell is by the existence of a handle, since workload
+					// addresses have always used a handle, whereas tunnel addresses didn't start
+					// using handles until the same time as they got allocation attributes.
+					if handle != nil {
+						// Handle exists, so this address belongs to a workload. We need to assign
+						// a new one for the node, but we shouldn't clean up the old address.
+						logCtx.WithField("currentAddr", addr).Info("Current address is occupied, assign a new one")
+					} else {
+						// Handle does not exist. This is just an old tunnel address that comes from
+						// a time before we used handles and allocation attributes. Attempt to
+						// reassign the same address, but now with metadata. It's possible that someone
+						// else takes the address while we do this, in which case we'll just
+						// need to assign a new address.
+						if err := correctAllocationWithHandle(ctx, c, addr, nodename, attrType); err != nil {
+							if _, ok := err.(cerrors.ErrorResourceAlreadyExists); !ok {
+								// Unknown error attempting to allocate the address. Exit.
+								logCtx.WithError(err).Fatal("Error correcting tunnel IP allocation")
+							}
+
+							// The address was taken by someone else. We need to assign a new one.
+							logCtx.WithError(err).Warn("Failed to correct missing attributes, will assign a new address")
+						} else {
+							// We corrected the address, we can just return.
+							logCtx.Info("Updated tunnel address with allocation attributes")
+							return
+						}
+					}
+				} else {
+					// The allocation has attributes, but doesn't belong to us. Assign a new one.
+					logCtx.WithField("currentAddr", addr).Info("Current address is occupied, assign a new one")
+				}
+			} else if _, ok := err.(cerrors.ErrorResourceDoesNotExist); ok {
+				// The tunnel address is not assigned, reassign it.
+				logCtx.WithField("currentAddr", addr).Info("Current address is not assigned, assign a new one")
+
+				// Defensively release any IP addresses with this handle. This covers a theoretical case
+				// where the node object has lost its reference to its correct IP, but the allocation still exists
+				// in IPAM. For example, if the node object was manually edited.
+				release = true
+			} else {
+				// Failed to get assignment attributes, datastore connection issues possible, panic
+				logCtx.WithError(err).Panicf("Failed to get assignment attributes for CIDR '%s'", addr)
+			}
+		}
+
+		if release {
+			logCtx.WithField("IP", addr).Info("Release any old tunnel addresses")
+			handle, _ := generateHandleAndAttributes(nodename, attrType)
+			if err := c.IPAM().ReleaseByHandle(ctx, handle); err != nil {
+				if _, ok := err.(cerrors.ErrorResourceDoesNotExist); !ok {
+					logCtx.WithError(err).Fatal("Failed to release old addresses")
+				}
+				// No existing allocations for this node.
+			}
+		}
+
+		if assign {
+			logCtx.WithField("IP", addr).Info("Assign new tunnel address")
+			assignHostTunnelAddr(ctx, c, nodename, cidrs, attrType)
 		}
 	}
+	// Work out if we need to assign a tunnel address.
+	// In most cases we should not release current address and should assign new one.
 
-	if assign {
-		logCtx.WithField("IP", addr).Info("Assign new tunnel address")
-		assignHostTunnelAddr(ctx, c, nodename, cidrs, attrType)
-	}
 }
 
 func correctAllocationWithHandle(ctx context.Context, c client.Interface, addr, nodename string, attrType string) error {
@@ -473,9 +477,14 @@ func updateNodeWithAddress(ctx context.Context, c client.Interface, nodename str
 			return err
 		}
 
+		isIPv4 := net.ParseIP(addr).To4()
 		switch attrType {
 		case ipam.AttributeTypeVXLAN:
-			node.Spec.IPv6VXLANTunnelAddr = addr
+			if isIPv4 != nil {
+				node.Spec.IPv4VXLANTunnelAddr = addr
+			} else {
+				node.Spec.IPv6VXLANTunnelAddr = addr
+			}
 		case ipam.AttributeTypeIPIP:
 			if node.Spec.BGP == nil {
 				node.Spec.BGP = &api.NodeBGPSpec{}
