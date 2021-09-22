@@ -440,13 +440,13 @@ func assignHostTunnelAddr(ctx context.Context, c client.Interface, nodename stri
 		logCtx.WithError(err).Fatal("Unable to autoassign an address")
 	}
 
-	if len(ipv4Addrs) == 0 && num4 == 1 {
+	if len(ipv4Addrs) == 0 {
 		logCtx.Fatal("Unable to autoassign an ipv4 address - pools are likely exhausted.")
 	} else {
 		addrs = append(addrs, ipv4Addrs[0].IP.String())
 	}
 
-	if len(ipv6Addrs) == 0 && num6 == 1 {
+	if len(ipv6Addrs) == 0 {
 		logCtx.Fatal("Unable to autoassign an ipv6 address - pools are likely exhausted.")
 	} else {
 		addrs = append(addrs, ipv6Addrs[0].IP.String())
