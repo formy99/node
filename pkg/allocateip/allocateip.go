@@ -504,7 +504,7 @@ func updateNodeWithAddress(ctx context.Context, c client.Interface, nodename str
 
 		_, err = c.Nodes().Update(ctx, node, options.SetOptions{})
 		log.WithField("IPv4VXLANTunnelAddr", node.Spec.IPv4VXLANTunnelAddr).Info("node ipv4 vxlan address")
-		log.WithField("IPv6VXLANTunnelAddr", node.Spec.IPv6VXLANTunnelAddr).Info("node ipv5 vxlan address")
+		log.WithField("IPv6VXLANTunnelAddr", node.Spec.IPv6VXLANTunnelAddr).Info("node ipv6 vxlan address")
 		if _, ok := err.(cerrors.ErrorResourceUpdateConflict); ok {
 			// Wait for a second and try again if there was a conflict during the resource update.
 			log.WithField("node", node.Name).WithError(err).Info("Error updating node, retrying.")
