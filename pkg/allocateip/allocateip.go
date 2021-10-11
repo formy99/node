@@ -246,6 +246,8 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 	var addrs []string
 	switch attrType {
 	case ipam.AttributeTypeVXLAN:
+		logCtx.WithField("IPv4VXLANTunnelAddr", node.Spec.IPv4VXLANTunnelAddr).Info("get node spec:")
+		logCtx.WithField("IPv6VXLANTunnelAddr", node.Spec.IPv6VXLANTunnelAddr).Info("get node spec:")
 		addrs = append(addrs, node.Spec.IPv4VXLANTunnelAddr)
 		addrs = append(addrs, node.Spec.IPv6VXLANTunnelAddr)
 	case ipam.AttributeTypeIPIP:
@@ -260,7 +262,7 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 	for _, addr := range addrs {
 		release := false
 		assign := true
-
+		logCtx.WithField("addr", addr).Info("get tunnel address is ")
 		if addr == "" {
 			// The tunnel has no IP address assigned, assign one.
 			logCtx.Info("Assign a new tunnel address")
