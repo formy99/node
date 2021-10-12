@@ -226,6 +226,9 @@ func reconcileTunnelAddrs(nodename string, cfg *apiconfig.CalicoAPIConfig, c cli
 	// Query the VXLAN enabled pools and either configure the tunnel
 	// address, or remove it.
 	if cidrs := determineEnabledPoolCIDRs(*node, *ipPoolList, ipam.AttributeTypeVXLAN); len(cidrs) > 0 {
+		for _, cidr := range cidrs {
+			log.Info(cidr.String())
+		}
 		ensureHostTunnelAddress(ctx, c, nodename, cidrs, ipam.AttributeTypeVXLAN)
 	} else {
 		removeHostTunnelAddr(ctx, c, nodename, ipam.AttributeTypeVXLAN)
@@ -246,6 +249,12 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 	var addrs []string
 	switch attrType {
 	case ipam.AttributeTypeVXLAN:
+		if node.Spec.IPv4VXLANTunnelAddr == "" {
+			logCtx.Info("node.Spec.IPv4VXLANTunnelAddr is nil")
+		}
+		if node.Spec.IPv6VXLANTunnelAddr == "" {
+			logCtx.Info("node.Spec.IPv6XVLANTunnelAddr is nil")
+		}
 		logCtx.WithField("IPv4VXLANTunnelAddr", node.Spec.IPv4VXLANTunnelAddr).Info("get node spec:")
 		logCtx.WithField("IPv6VXLANTunnelAddr", node.Spec.IPv6VXLANTunnelAddr).Info("get node spec:")
 		addrs = append(addrs, node.Spec.IPv4VXLANTunnelAddr)
@@ -681,6 +690,9 @@ func determineEnabledPoolCIDRs(node api.Node, ipPoolList api.IPPoolList, attrTyp
 func isIpInPool(ipAddrStr string, cidrs []net.IPNet) bool {
 	ipAddress := net.ParseIP(ipAddrStr)
 	for _, cidr := range cidrs {
+		if cidr.Version() != ipAddress.Version() {
+			continue
+		}
 		if cidr.Contains(ipAddress.IP) {
 			return true
 		}
