@@ -249,16 +249,13 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 	var addrs []string
 	switch attrType {
 	case ipam.AttributeTypeVXLAN:
-		if node.Spec.IPv4VXLANTunnelAddr == "" {
-			logCtx.Info("node.Spec.IPv4VXLANTunnelAddr is nil")
+		if node.Spec.IPv4VXLANTunnelAddr != "" {
+			addrs = append(addrs, node.Spec.IPv4VXLANTunnelAddr)
 		}
-		if node.Spec.IPv6VXLANTunnelAddr == "" {
-			logCtx.Info("node.Spec.IPv6XVLANTunnelAddr is nil")
+		if node.Spec.IPv6VXLANTunnelAddr != "" {
+			addrs = append(addrs, node.Spec.IPv6VXLANTunnelAddr)
 		}
-		logCtx.WithField("IPv4VXLANTunnelAddr", node.Spec.IPv4VXLANTunnelAddr).Info("get node spec:")
-		logCtx.WithField("IPv6VXLANTunnelAddr", node.Spec.IPv6VXLANTunnelAddr).Info("get node spec:")
-		addrs = append(addrs, node.Spec.IPv4VXLANTunnelAddr)
-		addrs = append(addrs, node.Spec.IPv6VXLANTunnelAddr)
+
 	case ipam.AttributeTypeIPIP:
 		if node.Spec.BGP != nil {
 			addrs = append(addrs, node.Spec.BGP.IPv4IPIPTunnelAddr)
@@ -268,20 +265,23 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 			addrs = append(addrs, node.Spec.Wireguard.InterfaceIPv4Address)
 		}
 	}
-	for _, addr := range addrs {
-		release := false
-		assign := true
-		logCtx.WithField("addr", addr).Info("get tunnel address is ")
-		if addr == "" {
-			// The tunnel has no IP address assigned, assign one.
-			logCtx.Info("Assign a new tunnel address")
+	if len(addrs) ==0 {
+		//release all old ipv4 and ipv6 address
+		handle, _ := generateHandleAndAttributes(nodename, attrType)
+		if err := c.IPAM().ReleaseByHandle(ctx, handle); err != nil {
+			if _, ok := err.(cerrors.ErrorResourceDoesNotExist); !ok {
+				logCtx.WithError(err).Fatal("Failed to release old addresses")
+			}
+			// No existing allocations for this node.
+		}
+		assignHostTunnelAddr(ctx, c, nodename, cidrs, attrType)
 
-			// Defensively release any IP addresses with this handle. This covers a theoretical case
-			// where the node object has lost its reference to its IP, but the allocation still exists
-			// in IPAM. For example, if the node object was manually edited.
-			release = true
-		} else {
-			// Go ahead checking status of current address.
+	}else {
+		for _, addr := range addrs {
+			release := false
+			assign := true
+
+				// Go ahead checking status of current address.
 			ipAddr := gnet.ParseIP(addr)
 			if ipAddr == nil {
 				logCtx.WithError(err).Fatalf("Failed to parse the CIDR '%s'", addr)
@@ -347,24 +347,26 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 				// Failed to get assignment attributes, datastore connection issues possible, panic
 				logCtx.WithError(err).Panicf("Failed to get assignment attributes for CIDR '%s'", addr)
 			}
-		}
 
-		if release {
-			logCtx.WithField("IP", addr).Info("Release any old tunnel addresses")
-			handle, _ := generateHandleAndAttributes(nodename, attrType)
-			if err := c.IPAM().ReleaseByHandle(ctx, handle); err != nil {
-				if _, ok := err.(cerrors.ErrorResourceDoesNotExist); !ok {
-					logCtx.WithError(err).Fatal("Failed to release old addresses")
+
+			if release {
+				logCtx.WithField("IP", addr).Info("Release any old tunnel addresses")
+				handle, _ := generateHandleAndAttributes(nodename, attrType)
+				if err := c.IPAM().ReleaseByHandle(ctx, handle); err != nil {
+					if _, ok := err.(cerrors.ErrorResourceDoesNotExist); !ok {
+						logCtx.WithError(err).Fatal("Failed to release old addresses")
+					}
+					// No existing allocations for this node.
 				}
-				// No existing allocations for this node.
+			}
+
+			if assign {
+				logCtx.WithField("IP", addr).Info("Assign new tunnel address")
+				assignHostTunnelAddr(ctx, c, nodename, cidrs, attrType)
 			}
 		}
-
-		if assign {
-			logCtx.WithField("IP", addr).Info("Assign new tunnel address")
-			assignHostTunnelAddr(ctx, c, nodename, cidrs, attrType)
-		}
 	}
+
 	// Work out if we need to assign a tunnel address.
 	// In most cases we should not release current address and should assign new one.
 
