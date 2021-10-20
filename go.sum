@@ -219,6 +219,10 @@ github.com/formy99/felix v0.0.0-20211018062937-18e0386b19af h1:inp/soYjUkWjvASrB
 github.com/formy99/felix v0.0.0-20211018062937-18e0386b19af/go.mod h1:+ZxBxvD+7CK/vqGU7CAoexOjuOJF5Olc409Z585zQd8=
 github.com/formy99/felix v0.0.0-20211020050214-21bd46fffcfa h1:75u75qiMUs/x3jDs4lxnGCU2bd86mNefhLdn1+JXb0g=
 github.com/formy99/felix v0.0.0-20211020050214-21bd46fffcfa/go.mod h1:RR2xJXkQDAmK6YJWKx7YXrgz7fertq2qSp5Aqgf83XE=
+github.com/formy99/felix v0.0.0-20211020095824-448778b742d6 h1:bgP5WdG4sjuZrFofDmS7tncJlCtxvzsgxarabM/TFLY=
+github.com/formy99/felix v0.0.0-20211020095824-448778b742d6/go.mod h1:RR2xJXkQDAmK6YJWKx7YXrgz7fertq2qSp5Aqgf83XE=
+github.com/formy99/felix v0.0.0-20211020101523-25f2497063d1 h1:oZceiRS/adJo+A3rCckIJ90tIOFg4Mx2wQ4bYl70EkE=
+github.com/formy99/felix v0.0.0-20211020101523-25f2497063d1/go.mod h1:RR2xJXkQDAmK6YJWKx7YXrgz7fertq2qSp5Aqgf83XE=
 github.com/formy99/libcalico-go v1.7.2-0.20211013141843-5dc695195fb9 h1:fGgo1eShOGkbcNhuSElKw2H7R2On9eeXqZYJSSBigSo=
 github.com/formy99/libcalico-go v1.7.2-0.20211013141843-5dc695195fb9/go.mod h1:CA54aw5b1PXwBWsl4k98ovXcLg8lw2X7OxiEqjjexFM=
 github.com/formy99/libcalico-go v1.7.2-0.20211020031509-eaff8f6fbb3c h1:cZ4ZJzu43BWXW6xsu07s9D2K6yZ0OlLYxBK6zavBsfg=
