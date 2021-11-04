@@ -12,11 +12,13 @@ import (
 
 	"github.com/projectcalico/libcalico-go/lib/apiconfig"
 	api "github.com/projectcalico/libcalico-go/lib/apis/v3"
+
 	bapi "github.com/projectcalico/libcalico-go/lib/backend/api"
 	"github.com/projectcalico/libcalico-go/lib/backend/model"
 	"github.com/projectcalico/libcalico-go/lib/backend/syncersv1/tunnelipsyncer"
 	client "github.com/projectcalico/libcalico-go/lib/clientv3"
 	cerrors "github.com/projectcalico/libcalico-go/lib/errors"
+	cresources "github.com/projectcalico/libcalico-go/lib/resources"
 	"github.com/projectcalico/libcalico-go/lib/ipam"
 	"github.com/projectcalico/libcalico-go/lib/net"
 	"github.com/projectcalico/libcalico-go/lib/options"
@@ -247,6 +249,24 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 
 	// Get the address and ipam attribute string
 	var addrs []string
+	var isDualstack bool
+
+	if node.Spec.BGP.IPv4Address != "" && node.Spec.BGP.IPv6Address != "" {
+		isDualstack = true
+	}
+	ipv6, _ := cresources.FindNodeAddress(node, api.InternalIP)
+	if ipv6 == nil {
+		ipv6, _ = cresources.FindNodeAddress(node, api.ExternalIP)
+	}
+
+	ipv4, _ := cresources.FindNodeIPv4Address(node, api.InternalIP)
+	if ipv4 == nil {
+		ipv4, _ = cresources.FindNodeIPv4Address(node, api.ExternalIP)
+	}
+	if  ipv4 != nil && ipv6 !=nil {
+		isDualstack = true
+	}
+
 	switch attrType {
 	case ipam.AttributeTypeVXLAN:
 		if node.Spec.IPv4VXLANTunnelAddr != "" {
@@ -265,7 +285,7 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 			addrs = append(addrs, node.Spec.Wireguard.InterfaceIPv4Address)
 		}
 	}
-	if len(addrs) ==0 {
+	if len(addrs) ==0 || isDualstack && len(addrs) <2 {
 		//release all old ipv4 and ipv6 address
 		handle, _ := generateHandleAndAttributes(nodename, attrType)
 		if err := c.IPAM().ReleaseByHandle(ctx, handle); err != nil {
@@ -276,7 +296,7 @@ func ensureHostTunnelAddress(ctx context.Context, c client.Interface, nodename s
 		}
 		assignHostTunnelAddr(ctx, c, nodename, cidrs, attrType)
 
-	}else {
+	} else {
 		for _, addr := range addrs {
 			release := false
 			assign := true
