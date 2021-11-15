@@ -559,7 +559,7 @@ func configureIPsAndSubnets(node *api.Node) (bool, error) {
 	}
 
 	ipv6Env := os.Getenv("IP6")
-	if ipv6Env == "autodetect" {
+	if ipv6Env == "autodetect" ||  (ipv6Env == "" && node.Spec.BGP.IPv6Address == "") {
 		adm := os.Getenv("IP6_AUTODETECTION_METHOD")
 		cidr := autoDetectCIDR(adm, 6)
 		if cidr != nil {
