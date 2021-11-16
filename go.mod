@@ -23,7 +23,7 @@ require (
 replace (
 	github.com/Microsoft/hcsshim => github.com/projectcalico/hcsshim v0.8.9-calico
 	github.com/kelseyhightower/confd => github.com/formy99/confd v1.0.1-0.20211104024432-39bc9c05110c
-	github.com/projectcalico/felix v0.0.0-20210518114716-31a1f2adfdec => github.com/formy99/felix v0.0.0-20211115113555-b6723246a0a8
+	github.com/projectcalico/felix v0.0.0-20210518114716-31a1f2adfdec => github.com/formy99/felix v0.0.0-20211116114318-152b8ff771ea
 	github.com/projectcalico/libcalico-go v1.7.2-0.20210518153130-35bb3f8c906d => github.com/formy99/libcalico-go v1.7.2-0.20211104022706-577d5d45605e
 	github.com/sirupsen/logrus => github.com/projectcalico/logrus v1.0.4-calico
 
