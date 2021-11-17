@@ -71,7 +71,7 @@ func setTunnelAddressForNode(tunnelType string, n *api.Node, addr string) {
 	if tunnelType == ipam.AttributeTypeIPIP {
 		n.Spec.BGP.IPv4IPIPTunnelAddr = addr
 	} else if tunnelType == ipam.AttributeTypeVXLAN {
-		n.Spec.IPv4VXLANTunnelAddr = addr
+		n.Spec.IPv6VXLANTunnelAddr = addr
 	} else if tunnelType == ipam.AttributeTypeWireguard {
 		if addr != "" {
 			n.Spec.Wireguard = &api.NodeWireguardSpec{
@@ -98,7 +98,7 @@ func checkTunnelAddressEmpty(c client.Interface, tunnelType string, nodeName str
 	if tunnelType == ipam.AttributeTypeIPIP {
 		addr = n.Spec.BGP.IPv4IPIPTunnelAddr
 	} else if tunnelType == ipam.AttributeTypeVXLAN {
-		addr = n.Spec.IPv4VXLANTunnelAddr
+		addr = n.Spec.IPv6VXLANTunnelAddr
 	} else if tunnelType == ipam.AttributeTypeWireguard {
 		if n.Spec.Wireguard != nil {
 			addr = n.Spec.Wireguard.InterfaceIPv4Address
@@ -126,7 +126,7 @@ func checkTunnelAddressForNode(c client.Interface, tunnelType string, nodeName s
 	if tunnelType == ipam.AttributeTypeIPIP {
 		addr = n.Spec.BGP.IPv4IPIPTunnelAddr
 	} else if tunnelType == ipam.AttributeTypeVXLAN {
-		addr = n.Spec.IPv4VXLANTunnelAddr
+		addr = n.Spec.IPv6VXLANTunnelAddr
 	} else if tunnelType == ipam.AttributeTypeWireguard {
 		if n.Spec.Wireguard != nil {
 			addr = n.Spec.Wireguard.InterfaceIPv4Address

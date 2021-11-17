@@ -105,11 +105,13 @@ func main() {
 		os.Exit(0)
 	}
 
+	logrus.Infof("runfelix value is :", runFelix)
 	// Decide which action to take based on the given flags.
 	if *version {
 		fmt.Println(startup.VERSION)
 		os.Exit(0)
 	} else if *runFelix {
+		logrus.Info("jump into felix.run method")
 		logrus.SetFormatter(&logutils.Formatter{Component: "felix"})
 		felix.Run("/etc/calico/felix.cfg", buildinfo.GitVersion, buildinfo.BuildDate, buildinfo.GitRevision)
 	} else if *runBPF {

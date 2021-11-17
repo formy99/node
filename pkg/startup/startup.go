@@ -18,6 +18,7 @@ import (
 	cryptorand "crypto/rand"
 	"encoding/json"
 	"fmt"
+	"github.com/projectcalico/node/pkg/startup/autodetection/ipv4"
 	"io/ioutil"
 	"net"
 	"os"
@@ -49,7 +50,6 @@ import (
 
 	"github.com/projectcalico/node/pkg/calicoclient"
 	"github.com/projectcalico/node/pkg/startup/autodetection"
-	"github.com/projectcalico/node/pkg/startup/autodetection/ipv4"
 )
 
 const (
@@ -559,7 +559,7 @@ func configureIPsAndSubnets(node *api.Node) (bool, error) {
 	}
 
 	ipv6Env := os.Getenv("IP6")
-	if ipv6Env == "autodetect" {
+	if ipv6Env == "autodetect" ||  (ipv6Env == "" && node.Spec.BGP.IPv6Address == "") {
 		adm := os.Getenv("IP6_AUTODETECTION_METHOD")
 		cidr := autoDetectCIDR(adm, 6)
 		if cidr != nil {
@@ -906,6 +906,7 @@ func configureIPPools(ctx context.Context, client client.Interface, kubeadmConfi
 
 	ipv4IpipModeEnvVar := strings.ToLower(os.Getenv("CALICO_IPV4POOL_IPIP"))
 	ipv4VXLANModeEnvVar := strings.ToLower(os.Getenv("CALICO_IPV4POOL_VXLAN"))
+	ipv6VXLANModeEnvVar := strings.ToLower(os.Getenv("CALICO_IPV6POOL_VXLAN"))
 
 	var (
 		ipv4BlockSize int
@@ -999,7 +1000,7 @@ func configureIPPools(ctx context.Context, client client.Interface, kubeadmConfi
 		log.Debug("Create default IPv6 IP pool")
 		outgoingNATEnabled := evaluateENVBool("CALICO_IPV6POOL_NAT_OUTGOING", false)
 
-		createIPPool(ctx, client, ipv6Cidr, DEFAULT_IPV6_POOL_NAME, string(api.IPIPModeNever), string(api.VXLANModeNever), outgoingNATEnabled, ipv6BlockSize, ipv6NodeSelector)
+		createIPPool(ctx, client, ipv6Cidr, DEFAULT_IPV6_POOL_NAME, string(api.IPIPModeNever), ipv6VXLANModeEnvVar, outgoingNATEnabled, ipv6BlockSize, ipv6NodeSelector)
 	}
 }
 
@@ -1032,7 +1033,7 @@ func createIPPool(ctx context.Context, client client.Interface, cidr *cnet.IPNet
 	case "always":
 		vxlanMode = api.VXLANModeAlways
 	default:
-		log.Errorf("Unrecognized VXLAN mode specified in CALICO_IPV4POOL_VXLAN'%s'", vxlanModeName)
+		log.Errorf("Unrecognized VXLAN mode specified in CALICO_IPV6POOL_VXLAN'%s'", vxlanModeName)
 		terminate()
 	}
 

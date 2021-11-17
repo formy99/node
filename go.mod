@@ -9,8 +9,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/projectcalico/cni-plugin v1.11.1-0.20210513162645-527a6aea2a07
 	github.com/projectcalico/felix v0.0.0-20210518114716-31a1f2adfdec
-	github.com/projectcalico/libcalico-go v1.7.2-0.20210512193219-9bbd69b5de2b
-	github.com/projectcalico/typha v0.7.3-0.20210512195227-b25be64ff3a2
+	github.com/projectcalico/libcalico-go v1.7.2-0.20210518153130-35bb3f8c906d
+	github.com/projectcalico/typha v0.7.3-0.20210518155147-75c42c949f88
 	github.com/sirupsen/logrus v1.7.0
 	github.com/vishvananda/netlink v1.1.0
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
@@ -22,8 +22,9 @@ require (
 
 replace (
 	github.com/Microsoft/hcsshim => github.com/projectcalico/hcsshim v0.8.9-calico
-	github.com/kelseyhightower/confd => github.com/projectcalico/confd v1.0.1-0.20210512200043-b48ac64483ee
-
+	github.com/kelseyhightower/confd => github.com/formy99/confd v1.0.1-0.20211104024432-39bc9c05110c
+	github.com/projectcalico/felix v0.0.0-20210518114716-31a1f2adfdec => github.com/formy99/felix v0.0.0-20211117014003-5da2cbfad96a
+	github.com/projectcalico/libcalico-go v1.7.2-0.20210518153130-35bb3f8c906d => github.com/formy99/libcalico-go v1.7.2-0.20211104022706-577d5d45605e
 	github.com/sirupsen/logrus => github.com/projectcalico/logrus v1.0.4-calico
 
 	// Need replacements for all the k8s subsidiary projects that are pulled in indirectly because
